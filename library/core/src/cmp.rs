@@ -643,6 +643,43 @@ impl Ordering {
     }
 }
 
+#[repr(i8)]
+pub enum StrictOrdering {
+    Less = -1,
+    Greater = 1,
+}
+
+impl Residual for StrictOrdering {
+    type TryType = Ordering;
+}
+
+impl FromResidual<StrictOrdering> for Ordering {
+    fn from_residual(residual: StrictOrdering) -> Self {
+        match residual {
+            StrictOrdering::Less => Self::Less,
+            StrictOrdering::Greater => Self::Greater,
+        }
+    }
+}
+
+impl Try for Ordering {
+    type Output = ();
+
+    type Residual = StrictOrdering;
+
+    fn from_output(output: ()) -> Self {
+        Self::Equal
+    }
+
+    fn branch(self) -> ControlFlow<Self::Residual, Self::Output> {
+        match self {
+            Self::Less => ControlFlow::Break(StrictOrdering::Less),
+            Self::Equal => ControlFrom::Continue(()),
+            Self::Greater => ControlFlow::Break(StrictOrdering::Greater),
+        }
+    }
+}
+
 /// A helper struct for reverse ordering.
 ///
 /// This struct is a helper to be used with functions like [`Vec::sort_by_key`] and

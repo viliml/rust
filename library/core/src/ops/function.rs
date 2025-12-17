@@ -305,4 +305,26 @@ mod impls {
             (*self).call_mut(args)
         }
     }
+
+    #[unstable(feature = "never_type", issue = "35121")]
+    impl<A: Tuple> FnOnce<A> for ! {
+        type Output = !;
+        extern "rust-call" fn call_once(self, _: A) -> Self::Output {
+            self
+        }
+    }
+
+    #[unstable(feature = "never_type", issue = "35121")]
+    impl<A: Tuple> FnMut<A> for ! {
+        extern "rust-call" fn call_mut(&mut self, _: A) -> Self::Output {
+            *self
+        }
+    }
+
+    #[unstable(feature = "never_type", issue = "35121")]
+    impl<A: Tuple> Fn<A> for ! {
+        extern "rust-call" fn call(&self, _: A) -> Self::Output {
+            *self
+        }
+    }
 }
